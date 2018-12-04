@@ -39,7 +39,8 @@ NC='\033[0m' # No Color
 		  	echo "you selected 3"
 		fi
 	  ;; 
-	  4)res='last 10 user' 
+	  4)
+	  	w -h | cut -d' ' -f1 | sort | uniq
 	  ;;
 	  5)res='quit'
 	  	exit 1
