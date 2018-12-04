@@ -10,6 +10,7 @@ do
 	read ch;
 	printf "\n---------------------------------------------------------\n\n"
 	# Switch Case to perform 
+GREEN='\e[32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 	case $ch in
@@ -21,25 +22,37 @@ NC='\033[0m' # No Color
 		  	read un
 		  	UserExist $un
 			if [ $? = 0 ] ; then
-
 				printf "${RED}Warning: This user already exists${NC}\nplease enter to continue............"
 				read
 			else
 				printf "Full Name :\t"
 				read fn;
-				printf "Home Directory Leave blank for default :\t"
+				if [ ! -z "$fn" ];then
+					f_name="-c $fn"
+				else
+					f_name=""
+				fi
+				printf "Create Home Directory (y/n)? :\t"
 				read hd;
+				if [ "$hd" != "${hd#[Yy]}" ];then
+					HM="-m"
+				else
+					HM=""
+				fi
+				printf "hm is $HM"
 				printf "Select Following Available Shell or Leave blank for default : \n"
 				tail -n +2 /etc/shells
 				printf "Enter Shell :\t"
 				read sl;
 				printf "Password:\t"
 				read -s ps;
-				printf "\n"
-				useradd $un
-				if [ -z "$ps" ]; then
-					echo -e "$ps\n$ps" | sudo passwd $un
+				if [ ! -z "$ps" ]; then
+					#echo -e "$ps\n$ps" | sudo passwd $un --stdin
+					useradd $un -p $ps
+				else
+					useradd $un
 				fi
+				printf "\n\n${GREEN}$un User Succesfully Created${NC}\n"
 			fi
 		fi
 	  ;; 
@@ -51,14 +64,16 @@ NC='\033[0m' # No Color
 		  	read un;
 		  	UserExist $un
 		  	if [ $? = 0 ] ; then
-				read -p "What is your first name? " ans
-				if [ [ $ans =~ ^[Yy]$ ] && [ -d "/home/$un" ] ]
+				echo -n "Delete $un's Home Directory (y/n)? "
+				read ans
+				if [[ ("$answer" != "${answer#[Yy]}" && -d "/home/$un") ]]
 				then
 					userdel -r $un
 					echo "delete with dir"
 				else
 					userdel $un
 				fi
+				printf "\n ${GREEN}$un User Has Been Deleted${NC}\n"
 			else
 				printf "${RED}Warning: user $un does not exist${NC}"
 			fi
